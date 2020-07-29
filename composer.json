@@ -1,0 +1,24 @@
+{
+    "name": "byancode/library",
+    "description": "Importants libraries for laravel.",
+    "keywords": ["laravel", "authorization", "rc4", "token", "two factor", "clean base64"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Byancode",
+            "email": "byancode@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "laravel/framework": ">=6.0"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Byancode\\Library\\": "src/"
+        },
+        "files": []
+    },
+    "extra": {}
+}
