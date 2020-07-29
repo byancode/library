@@ -4,7 +4,7 @@ namespace Byancode\Library;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 
-class Authorization
+class Authentication
 {
     private static function ip()
     {
@@ -23,6 +23,16 @@ class Authorization
             self::token(),
             strtotime($expire),
         ]);
+    }
+    private static function parser(array $types)
+    {
+        return Arr::flatten(array_map(function($type) {
+            return \explode(',', $type);
+        }, Arr::flatten($types)));
+    }
+    public static function verify(string $code, int $id, ...$types)
+    {
+        return (new self($code))->validate($id, self::parser($types));
     }
 
     public $ip;
@@ -45,10 +55,16 @@ class Authorization
             ) = $data;
         }
     }
-    public function verify(string ...$types)
+    public function check(...$types)
     {
-        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (!$types || in_array($this->type, Arr::flatten($types)));
+        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (!$types || in_array($this->type, self::parser($types)));
     }
+
+    public function validate(int $id, ...$types)
+    {
+        return $id == $this->id && $this->check($types);
+    }
+
     public function toArray()
     {
         return [
