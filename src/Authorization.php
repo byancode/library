@@ -1,6 +1,7 @@
 <?php
 namespace Byancode\Library;
 
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 
 class Authorization
@@ -46,7 +47,7 @@ class Authorization
     }
     public function verify(string ...$types)
     {
-        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (!$types || in_array($this->type, $types));
+        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (!$types || in_array($this->type, Arr::flatten($types)));
     }
     public function toArray()
     {
