@@ -2,19 +2,21 @@
 namespace Byancode\Library;
 
 use Illuminate\Support\Arr;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Request;
 
-class Authentication
+class Authorize
 {
     private static function ip()
     {
         return Hash::crc32(Request::ip());
     }
+
     private static function token()
     {
-        return Hash::crc32(Token::get('authorization'));
+        return Hash::crc32(Request::server('HTTP_USER_AGENT'));
     }
-    public static function create(int $id, string $type = 'auth', string $expire = '+1 min')
+
+    public static function create(int $id, string $type = 'password', string $expire = '+1 min')
     {
         return RC4::encrypt([
             $id,
@@ -24,12 +26,20 @@ class Authentication
             strtotime($expire),
         ]);
     }
+
     private static function parser(array $types)
     {
-        return Arr::flatten(array_map(function($type) {
+        $types = array_map(function($type) {
             return \explode(',', $type);
-        }, Arr::flatten($types)));
+        }, Arr::flatten($types));
+        # ----------------------------------
+        $types = Arr::flatten($types);
+        # ----------------------------------
+        $types = array_map('trim', $types);
+        # ----------------------------------
+        return array_filter($types);
     }
+
     public static function verify(string $code, int $id, ...$types)
     {
         return (new self($code))->validate($id, self::parser($types));
@@ -55,9 +65,12 @@ class Authentication
             ) = $data;
         }
     }
+    
     public function check(...$types)
     {
-        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (!$types || in_array($this->type, self::parser($types)));
+        $types = self::parser($types);
+        # ----------------------------
+        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (empty($types) || in_array($this->type, $types));
     }
 
     public function validate(int $id, ...$types)

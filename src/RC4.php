@@ -1,5 +1,6 @@
 <?php
 namespace Byancode\Library;
+use Illuminate\Support\Facades\Session;
 
 class RC4
 {
@@ -7,7 +8,7 @@ class RC4
     {
         $key = array();
         $data = array();
-        $key_str = $key_str ?? env('APP_KEY');
+        $key_str = $key_str ?? Hash::crc32(settings('app.key'));
         for ($i = 0; $i < strlen($key_str); $i++) {
             $key[] = ord($key_str{$i});
         }
@@ -83,13 +84,13 @@ class RC4
     public static function token(int $number)
     {
         $random = substr(str_shuffle('qwertyuiopasdfghjklzxcvbnm'), 0, 2);
-        $session = Hash::crc32(session_id());
+        $session = Hash::crc32(Session::getId());
         $source = "{$random}:{$session}:{$number}";
         return U64::encode(self::crypt($source, $session));
     }
     public static function utoken(string $source)
     {
-        $session = Hash::crc32(session_id());
+        $session = Hash::crc32(Session::getId());
         list($random, $hash, $number) = explode(':', self::crypt(U64::decode($source), $session));
         return $hash === $session ? intval($number) : null;
     }
