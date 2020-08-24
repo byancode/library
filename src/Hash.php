@@ -53,7 +53,7 @@ class Hash
         return self::sha1($data);
     }
     // ------------------------------------------------------------
-    public function len10($data)
+    public static function len10($data)
     {
         return substr(self::sm($data), 0, 10);
     }
