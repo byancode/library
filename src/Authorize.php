@@ -30,7 +30,7 @@ class Authorize
     private static function parser(array $types)
     {
         $types = array_map(function($type) {
-            return \explode(',', $type);
+            return \preg_split('/[^a-zA-Z0-9_]+/', $type);
         }, Arr::flatten($types));
         # ----------------------------------
         $types = Arr::flatten($types);
@@ -68,9 +68,7 @@ class Authorize
     
     public function check(...$types)
     {
-        $types = self::parser($types);
-        # ----------------------------
-        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (empty($types) || in_array($this->type, $types));
+        return $this->expire >= time() && self::ip() == $this->ip && self::token() == $this->token && (empty($types) || in_array($this->type, Arr::flatten($types)));
     }
 
     public function validate(int $id, ...$types)

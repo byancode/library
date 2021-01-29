@@ -2,7 +2,7 @@
 
 namespace Byancode\Library;
 
-class TwoFactor
+class U2FA
 {
     /**
      * @var string
