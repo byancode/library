@@ -16,25 +16,15 @@ class Authorize
         return Hash::crc32(Request::header('X-Device-Uuid'));
     }
 
-    public static function unique(string $code)
-    {
-        $hash = md5($code);
-        $path = storage_path('authorize');
-        $file = storage_path("authorize/$hash.token");
-        !is_dir($path) && mkdir($path);
-        file_put_contents($file, $code);
-        return $code;
-    }
-
     public static function create(int $id, string $type = 'password', string $expire = '+1 min')
     {
-        return self::unique(RC4::encrypt([
+        return RC4::encrypt([
             $id,
             $type,
             self::ip(),
             self::device(),
             strtotime($expire),
-        ]));
+        ]);
     }
 
     private static function parser(array $types)
@@ -80,21 +70,9 @@ class Authorize
         }
     }
 
-    public function isUnique()
-    {
-        $file = storage_path("authorize/{$this->hash}.token");
-        if (file_exists($file) === true) {
-            $code = file_get_contents($file);
-            unlink($file);
-            return $code === $this->code;
-        } else {
-            return false;
-        }
-    }
-
     public function validate(...$types)
     {
-        return $this->isUnique() && $this->expire >= time() && self::ip() == $this->ip && self::device() == $this->device && (empty($types) || in_array($this->type, Arr::flatten($types)));
+        return $this->expire >= time() && self::ip() == $this->ip && self::device() == $this->device && (empty($types) || in_array($this->type, Arr::flatten($types)));
     }
 
     public function check(int $id, ...$types)
