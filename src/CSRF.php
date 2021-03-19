@@ -1,9 +1,9 @@
 <?php
 namespace Byancode\Library;
 
-class CRF
+class CSRF
 {
-    const prefix = '__CRF__';
+    const prefix = '__CSRF__';
     public static function exists(string $key = '')
     {
         return app('session')->exists(self::prefix . $key);
